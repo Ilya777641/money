@@ -10,7 +10,7 @@ function QuickInput({ onAdd }) {
   const [loading, setLoading] = useState(false);
   const timeoutRef = useRef(null);
 
-  // Загружаем категории один раз (для селекта переопределения)
+  // Загружаем категории один раз
   useEffect(() => {
     fetch(`${API_URL}/categories`)
       .then(r => r.json())
@@ -18,8 +18,10 @@ function QuickInput({ onAdd }) {
       .catch(() => {});
   }, []);
 
-  // Debounced парсинг при вводе
+  // Debounced парсинг — только когда НЕ в режиме ручного выбора категории
   useEffect(() => {
+    if (overriding) return;
+
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     if (!text.trim()) {
@@ -42,7 +44,7 @@ function QuickInput({ onAdd }) {
     }, 300);
 
     return () => clearTimeout(timeoutRef.current);
-  }, [text]);
+  }, [text, overriding]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +68,8 @@ function QuickInput({ onAdd }) {
     setLoading(false);
   };
 
-  const catInfo = categories.find(c => c.name === (overriding ? overrideCategory : parsed?.category));
+  const currentCategory = overriding ? overrideCategory : parsed?.category;
+  const catInfo = categories.find(c => c.name === currentCategory);
 
   return (
     <form className="card quick-input" onSubmit={handleSubmit}>
@@ -78,7 +81,10 @@ function QuickInput({ onAdd }) {
         value={text}
         onChange={(e) => {
           setText(e.target.value);
-          setOverriding(false);
+          if (overriding) {
+            setOverriding(false);
+            setOverrideCategory('');
+          }
         }}
         autoFocus
       />
@@ -88,12 +94,12 @@ function QuickInput({ onAdd }) {
           <div className="parsed-info">
             <span className="parsed-emoji">{catInfo?.emoji || '📦'}</span>
             <div>
-              <div className="parsed-category">
-                {overriding ? overrideCategory : parsed.category}
-              </div>
+              <div className="parsed-category">{currentCategory}</div>
               <div className="parsed-desc">{parsed.description}</div>
             </div>
-            <div className="parsed-amount">{parsed.amount.toLocaleString('ru-RU')} ₽</div>
+            <div className="parsed-amount">
+              {parsed.amount.toLocaleString('ru-RU')} ₽
+            </div>
           </div>
 
           {parsed.confidence === 'low' && !overriding && (
@@ -112,8 +118,8 @@ function QuickInput({ onAdd }) {
                   type="button"
                   className="btn-secondary"
                   onClick={() => {
-                    setOverriding(true);
                     setOverrideCategory(parsed.category);
+                    setOverriding(true);
                   }}
                 >
                   ✏️ Изменить категорию
@@ -134,6 +140,16 @@ function QuickInput({ onAdd }) {
                 </select>
                 <button type="submit" className="btn-primary" disabled={loading}>
                   {loading ? 'Сохраняю...' : '✅ Добавить'}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setOverriding(false);
+                    setOverrideCategory('');
+                  }}
+                >
+                  Отмена
                 </button>
               </>
             )}
