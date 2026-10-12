@@ -9,6 +9,7 @@ function QuickInput({ onAdd }) {
   const [overrideCategory, setOverrideCategory] = useState('');
   const [loading, setLoading] = useState(false);
   const timeoutRef = useRef(null);
+  const prevTextRef = useRef('');
 
   // Загружаем категории один раз
   useEffect(() => {
@@ -18,9 +19,13 @@ function QuickInput({ onAdd }) {
       .catch(() => {});
   }, []);
 
-  // Debounced парсинг — только когда НЕ в режиме ручного выбора категории
+  // Debounced парсинг (только когда не overriding)
   useEffect(() => {
-    if (overriding) return;
+    if (overriding) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      return;
+    }
+    if (prevTextRef.current === text) return;
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
@@ -38,12 +43,15 @@ function QuickInput({ onAdd }) {
         });
         const data = await res.json();
         setParsed(data);
+        prevTextRef.current = text;
       } catch {
         setParsed(null);
       }
     }, 300);
 
-    return () => clearTimeout(timeoutRef.current);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [text, overriding]);
 
   const handleSubmit = async (e) => {
@@ -65,7 +73,22 @@ function QuickInput({ onAdd }) {
     setParsed(null);
     setOverriding(false);
     setOverrideCategory('');
+    prevTextRef.current = '';
     setLoading(false);
+  };
+
+  const handleOverrideClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOverrideCategory(parsed?.category || 'Другое');
+    setOverriding(true);
+  };
+
+  const handleCancelOverride = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOverriding(false);
+    setOverrideCategory('');
   };
 
   const currentCategory = overriding ? overrideCategory : parsed?.category;
@@ -108,52 +131,59 @@ function QuickInput({ onAdd }) {
             </div>
           )}
 
-          <div className="parsed-actions">
-            {!overriding ? (
-              <>
-                <button type="submit" className="btn-primary" disabled={loading}>
+          {overriding ? (
+            <>
+              <div className="override-categories">
+                {categories.map(c => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`override-chip ${overrideCategory === c.name ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setOverrideCategory(c.name);
+                    }}
+                  >
+                    {c.emoji} {c.name}
+                  </button>
+                ))}
+              </div>
+              <div className="override-actions">
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={loading}
+                >
                   {loading ? 'Сохраняю...' : '✅ Добавить'}
                 </button>
                 <button
                   type="button"
                   className="btn-secondary"
-                  onClick={() => {
-                    setOverrideCategory(parsed.category);
-                    setOverriding(true);
-                  }}
-                >
-                  ✏️ Изменить категорию
-                </button>
-              </>
-            ) : (
-              <>
-                <select
-                  className="category-select"
-                  value={overrideCategory}
-                  onChange={(e) => setOverrideCategory(e.target.value)}
-                >
-                  {categories.map(c => (
-                    <option key={c.id} value={c.name}>
-                      {c.emoji} {c.name}
-                    </option>
-                  ))}
-                </select>
-                <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? 'Сохраняю...' : '✅ Добавить'}
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => {
-                    setOverriding(false);
-                    setOverrideCategory('');
-                  }}
+                  onClick={handleCancelOverride}
                 >
                   Отмена
                 </button>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          ) : (
+            <div className="parsed-actions">
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={loading}
+              >
+                {loading ? 'Сохраняю...' : '✅ Добавить'}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleOverrideClick}
+              >
+                ✏️ Изменить категорию
+              </button>
+            </div>
+          )}
         </div>
       )}
 

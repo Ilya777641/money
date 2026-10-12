@@ -257,6 +257,46 @@ body {
   flex-wrap: wrap;
 }
 
+/* ===== OVERRIDE CATEGORIES (чипы вместо селекта) ===== */
+.override-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.override-chip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  touch-action: manipulation;
+}
+
+.override-chip:active {
+  transform: scale(0.96);
+}
+
+.override-chip.active {
+  background: var(--accent);
+  color: var(--bg-card);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.override-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== КНОПКИ ===== */
 .btn-primary {
   background: linear-gradient(135deg, var(--accent) 0%, #8a2a3d 100%);
   color: var(--bg-card);
@@ -298,21 +338,6 @@ body {
 .btn-secondary:active {
   background: var(--bg);
   color: var(--accent);
-}
-
-.category-select {
-  padding: 12px 14px;
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  font-size: 16px;
-  font-family: inherit;
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  cursor: pointer;
-  flex: 1;
-  min-width: 180px;
-  min-height: 46px;
 }
 
 /* ===== CHIPS ===== */
@@ -607,7 +632,6 @@ body {
     padding-right: calc(14px + env(safe-area-inset-right));
   }
 
-  /* Шапка */
   .app-header {
     margin-bottom: 20px;
     padding-bottom: 16px;
@@ -621,7 +645,6 @@ body {
     width: 70px;
   }
 
-  /* Навигация по месяцам */
   .month-nav {
     width: 100%;
     justify-content: space-between;
@@ -643,7 +666,6 @@ body {
     flex: 1;
   }
 
-  /* Карточки */
   .card {
     padding: 18px 16px;
     border-radius: 16px;
@@ -654,7 +676,6 @@ body {
     margin-bottom: 14px;
   }
 
-  /* Форма ввода */
   .quick-input-field {
     padding: 15px 16px;
     font-size: 16px;
@@ -697,13 +718,25 @@ body {
     flex-direction: column;
   }
 
-  .parsed-actions button,
-  .parsed-actions .category-select {
+  .parsed-actions button {
     width: 100%;
     min-height: 48px;
   }
 
-  /* Чипы — крупнее и удобнее */
+  .override-chip {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  .override-actions {
+    flex-direction: column;
+  }
+
+  .override-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+
   .chips {
     gap: 8px;
     margin-bottom: 14px;
@@ -737,7 +770,6 @@ body {
     min-height: 48px;
   }
 
-  /* Статистика — 2 в ряд */
   .stats-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -757,12 +789,10 @@ body {
     letter-spacing: 0.06em;
   }
 
-  /* График */
   .chart-wrap {
     height: 220px;
   }
 
-  /* Топ категорий — в столбик */
   .by-cat-row {
     grid-template-columns: 1fr;
     gap: 6px;
@@ -789,7 +819,6 @@ body {
     font-family: 'Playfair Display', serif;
   }
 
-  /* Список трат */
   .expense-item {
     padding: 12px 12px;
     gap: 12px;
@@ -821,7 +850,6 @@ body {
     font-size: 13px;
   }
 
-  /* Кнопки в целом */
   .btn-primary,
   .btn-secondary {
     padding: 13px 20px;
@@ -864,6 +892,11 @@ body {
   .quick-input-field {
     padding: 13px 14px;
     font-size: 15px;
+  }
+
+  .override-chip {
+    padding: 8px 10px;
+    font-size: 11px;
   }
 
   .chip {
