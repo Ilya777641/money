@@ -4,7 +4,15 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: [
+    'http://localhost:5174',
+    'https://money-kolinchenko.netlify.app',
+  ],
+  credentials: false,
+}));
+
 app.use(express.json());
 
 const pool = new Pool({
