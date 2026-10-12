@@ -9,6 +9,8 @@ app.use(cors({
   origin: [
     'http://localhost:5174',
     'https://money-kolinchenko.netlify.app',
+    'https://money-5xl.pages.dev',
+    'https://money.my-money.site',
   ],
   credentials: false,
 }));
